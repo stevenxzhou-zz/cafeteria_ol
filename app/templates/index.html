@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Cafeteria - Berkley{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css"></script>
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <h1>Hello, {% if current_user.is_authenticated() %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
+</div>
+{% for store in stores %}
+      <h1>{{ store.storename }}</h1>
+      {% for dish in dishes %}
+          {% if dish.store_id == store.id %}
+          <div class="col-md-2 column productbox">
+              <img src="http://placehold.it/460x250/e67e22/ffffff&text={{ dish.dishname }}" class="img-responsive">  
+                  <div class="producttitle">{{ dish.dishname }}</div>
+                    <div class="productprice">
+		      <div class="pull-right">
+			<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#dishModal" data-storeid="{{ store.id }}" data-dishid="{{ dish.id }}">pick!</button>
+		      </div>
+		    <div class="pricetext">${{'%0.1f'| format(dish.dishprice|float)}}</div>
+          </div>
+	  </div>	     
+	  {% endif %}
+      {% endfor %}
+      <div class="clearfix"></div>
+{% endfor %}
+
+<div class="modal fade" id="dishModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+	<div class="modal-dialog" role="document">
+	
+	  <div class="modal-content">
+	    <div class="modal-header">
+	      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	      <h4 class="js-title-step"></h4>
+	    </div>
+	    <div class="modal-body">
+	    	<form method="POST" role="form" id="orderform">
+	    	<div class="row hide" data-step="1" data-title="When do you want to pick up?">
+		    	<div class="form-group">
+	     			<label for="text">{{ timeform.storeid.label }}:</label>
+					{{ timeform.storeid(class='storeid form-control', readonly=true, type="hidden") }}
+					<input class="storename form-control" readonly>
+	  			</div>	
+		        <div class="form-group">
+	     			<label for="text">{{ timeform.dishid.label }}:</label>
+					{{ timeform.dishid(class='dishid form-control', readonly=true, type="hidden") }}
+					<input class="dishname form-control" readonly>
+	  			</div>	
+		        <div class="form-group">
+	     			<label for="text"> {{ timeform.time.label }}: </label>
+					{{ timeform.time(id='datetimepicker1',class='form-control') }}
+	  			</div>
+  			</div>
+  		    </form>
+  		    <form method="POST" role="form" method="POST" id="orderconfirm" action="submit-order">
+  			<div class="row hide" data-step="2" data-title="Please confirm your order">
+  				{{ timeform.hidden_tag() }}
+          		<div class="form-group">
+	     			<label for="text">{{ timeform.storeid.label }}:</label>
+					{{ timeform.storeid(class='storeid form-control', readonly=true, type="hidden") }}
+					<input class="storename form-control" readonly>
+	  			</div>	
+		       
+		        <div class="form-group">
+	     			<label for="text">{{ timeform.dishid.label }}:</label>
+					{{ timeform.dishid(class='dishid form-control', readonly=true, type="hidden") }}
+					<input class="dishname form-control" readonly>
+	  			</div>	
+		        <div class="form-group">
+	     			<label for="text"> {{ timeform.time.label }}: </label>
+					{{ timeform.time(id='datetimepicked',class='form-control', readonly=true) }}
+	  			</div>
+        	</div>
+            </form>
+        </div>
+	    <div class="modal-footer">
+	        <button type="button" class="btn btn-default js-btn-step pull-left" data-orientation="cancel" data-dismiss="modal">Cancel</button>
+	        <button type="button" class="btn btn-warning js-btn-step" data-orientation="previous">Previous</button>
+	        <button type="button" class="btn btn-success js-btn-step" data-orientation="next">Next</button>
+		</div>
+		</div>
+	  </div>
+	</div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+  
+  $('#dishModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var dishid = button.data('dishid') // Extract info from data-* attributes
+  var storeid = button.data('storeid') // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+ 
+  $.ajax({
+  	url:"http://localhost:5000/api/stores/"+storeid,
+  	dataType: "json"
+  }).done(function (data){
+  	store = data;
+  	modal.find('.modal-body .storename').val(store.storename)
+  	modal.find('.modal-body .storeid').val(storeid)
+  })
+  
+  $.ajax({
+  	url:"http://localhost:5000/api/dishes/"+dishid,
+  	dataType: "json"
+  }).done(function (data){
+  	dish = data;
+  	modal.find('.modal-body .dishname').val(dish.dishname)
+  	modal.find('.modal-body .dishid').val(dishid)
+  })
+  })
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='jquery-bootstrap-modal-steps.js') }}"></script>
+<script type="text/javascript">
+  var callback1 = function(){
+  	$("#datetimepicked").val($("#datetimepicker1").val());
+  	$("#datetimepicked").attr('value', $("#datetimepicker1").val());
+  	$("#orderform").submit(function(e) {
+  		e.preventDefault();
+  	});
+  }
+  $('#dishModal').modalSteps({
+	btnCancelHtml: 'Cancel',
+	btnPreviousHtml: 'Previous',
+	btnNextHtml: 'Next',
+	btnLastStepHtml: "Submit",
+	disableNextButton: false,
+	completeCallback: function(){
+		$("#orderconfirm").submit()
+	},
+	callbacks: {
+		'2': callback1
+	}
+	});
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='moment.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bootstrap-datetimepicker.min.js') }}"></script>
+<script type="text/javascript">
+	$('#datetimepicker1').datetimepicker({
+		format: 'MM/DD/YYYY HH:mm',
+		minDate: moment().add(2, 'hour'),
+		maxDate: moment().add(2, 'd')
+	})
+</script>
+{% endblock %}

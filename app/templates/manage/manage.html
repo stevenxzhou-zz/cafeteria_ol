@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Cafeteria - Berkley{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}"/>
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <h1 class="text-center">Hello, {% if current_user.is_authenticated() %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
+  <h2 class="text-center">{{ moment(current_time).format('LLL') }}</h2>
+
+</div>
+<div class="container" style="width:60%">
+	<h1 class="text-center">Active Orders</h1>
+	<table class="table table-hover">
+		<thead>
+			<th class="col-md-3">Dish Name</th>
+			<th class="col-md-3">Store Name</th>
+			<th class="col-md-2">Customer</th>
+			<th class="col-md-3">Time</th>
+			<th></th>
+			<th class="col-md-3">State</th>
+		</thead>
+	{% for order in orders %}
+	{% if order.state == 1%}
+		<tr>
+			<td class="col-md-3">{{ order.dish.dishname }}</td>
+			<td class="col-md-3">{{ order.store.storename }}</td>
+			<td class="col-md-2">{{ order.user.username}}</td>
+			<td class="col-md-3">{{ order.date }}</td>
+			<td>
+				<form method="POST" class="active-form">
+					{{ form.hidden_tag() }} 
+					{{ form.state(class='order-state', id=order.id, value=order.state) }}
+				</form>
+			</td>
+			<td class="col-md-1">
+				<button type="button" data-loading-text="Changing..." class="btn btn-primary markButton" btnid="{{ order.id }}" autocomplete="off">
+					Mark
+				</button>
+			</td>
+		</tr>
+	{% endif %}
+	{% endfor %}
+		<tr>
+			<td colspan="6"><button class="btn btn-block btn-success btn-large updatebtn">Update Orders</button></td>
+		</tr>
+	</table>
+</div>
+<div class="container" style="width:60%">
+	<h1 class="text-center">Picked Orders</h1>
+	<table class="table table-hover">
+		<thead>
+			<th class="col-md-3">Dish Name</th>
+			<th class="col-md-3">Store Name</th>
+			<th class="col-md-2">Customer</th>
+			<th class="col-md-3">Time</th>
+			<th></th>
+			<th class="col-md-3">State</th>
+		</thead>
+	{% for order in orders %}
+	{% if order.state == 2 %}
+		<tr>
+			<td class="col-md-3">{{ order.dish.dishname }}</td>
+			<td class="col-md-3">{{ order.store.storename }}</td>
+			<td class="col-md-2">{{ order.user.username}}</td>
+			<td class="col-md-3">{{ order.date }}</td>
+			<td>
+				<form method="POST" class="pickec-form">
+					{{ form.hidden_tag() }} 
+					{{ form.state(class='order-state', id=order.id, value=order.state) }}
+				</form>
+			</td>
+			<td class="col-md-1">
+				<button type="button" data-loading-text="Changing..." class="btn btn-primary recoverButton" btnid="{{ order.id }}" autocomplete="off">
+					Mark
+				</button>
+			</td>
+		</tr>
+	{% endif %}
+	{% endfor %}
+		<tr>
+			<td colspan="6"><button class="btn btn-block btn-success btn-large recoverbtn">Recover Orders</button></td>
+		</tr>
+	</table>
+</div>
+<div class="container" style="width:60%">
+	<h1 class="text-center">Missed Orders</h1>
+	<table class="table table-hover">
+		<thead>
+			<th class="col-md-3">Dish Name</th>
+			<th class="col-md-3">Store Name</th>
+			<th class="col-md-2">Customer</th>
+			<th class="col-md-3">Time</th>
+			<th class="col-md-3">State</th>
+		</thead>
+	{% for order in orders | sort(attribute='date',reverse=True) %}
+	{% if order.state == 3 %}
+		<tr>
+			<td class="col-md-3">{{ order.dish.dishname }}</td>
+			<td class="col-md-3">{{ order.store.storename }}</td>
+			<td class="col-md-2">{{ order.user.username}}</td>
+			<td class="col-md-3">{{ order.date }}</td>
+			<td class="col-md-1">
+				<button type="button" data-loading-text="Changing..." class="btn btn-primary" btnid="{{ order.id }}" disabled>
+					Miss
+				</button>
+			</td>
+		</tr>
+	{% endif %}
+	{% endfor %}
+	</table>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+
+<script type="text/javascript">
+	$('.updatebtn').on('click', function() {
+		$('.active-form').each(function(){
+			var state= $(this).find(".order-state").val();
+			var orderid = $(this).find(".order-state").attr("id");
+			console.log(orderid)
+			if (state == 2) {
+				$(this).on('submit', function(e) {
+					$.ajax({
+					  type: "POST",
+					  url: "http://localhost:5000/manageupdate-orders",
+					  data: {'state':state, 'orderid':orderid},
+					});
+					e.preventDefault()
+				})
+				$(this).submit()
+			}
+		})
+		$.post("/manage/update-missed")
+		location.reload()
+	})
+
+	$('.recoverbtn').on('click', function() {
+		$('.pickec-form').each(function(){
+			var state= $(this).find(".order-state").val();
+			var orderid = $(this).find(".order-state").attr("id");
+			console.log(orderid)
+			if (state == 1) {
+				$(this).on('submit', function(e) {
+					//$.post("update-orders/")
+					$.ajax({
+					  type: "POST",
+					  url: "http://localhost:5000/manageupdate-orders",
+					  data: {'state':state, 'orderid':orderid},
+					});
+					e.preventDefault()
+				})
+				$(this).submit()
+			}
+		})
+		$.post("/manage/update-missed")
+		location.reload()
+	})
+
+	$('.markButton').on('click', function () {
+		var $btn = $(this).button('toggle')
+		// business logic...
+		var id = $(this).attr("btnid");
+		if($btn.hasClass('active')){
+			$btn.closest('tr').addClass('danger')
+			$("#"+id).val(2)
+		}else{
+			$btn.closest('tr').removeClass('danger')
+			$("#"+id).val(1)
+		}
+	})
+
+	$('.recoverButton').on('click', function () {
+		var $btn = $(this).button('toggle')
+		var id = $(this).attr("btnid");
+		if($btn.hasClass('active')){
+			$btn.closest('tr').addClass('success')
+			$("#"+id).val(1)
+		}else{
+			$btn.closest('tr').removeClass('success')
+			$("#"+id).val(2)
+		}
+	})
+
+</script>
+
+{% endblock %}
+
+
