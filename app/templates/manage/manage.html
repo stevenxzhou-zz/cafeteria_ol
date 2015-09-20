@@ -125,7 +125,7 @@
 				$(this).on('submit', function(e) {
 					$.ajax({
 					  type: "POST",
-					  url: "http://localhost:5000/manageupdate-orders",
+					  url: "/manageupdate-orders",
 					  data: {'state':state, 'orderid':orderid},
 					});
 					e.preventDefault()
@@ -133,7 +133,7 @@
 				$(this).submit()
 			}
 		})
-		$.post("/manage/update-missed")
+		$.post("/update-missed")
 		location.reload()
 	})
 
@@ -147,7 +147,7 @@
 					//$.post("update-orders/")
 					$.ajax({
 					  type: "POST",
-					  url: "http://localhost:5000/manageupdate-orders",
+					  url: "update-orders",
 					  data: {'state':state, 'orderid':orderid},
 					});
 					e.preventDefault()
@@ -155,7 +155,7 @@
 				$(this).submit()
 			}
 		})
-		$.post("/manage/update-missed")
+		$.post("/update-missed")
 		location.reload()
 	})
 
