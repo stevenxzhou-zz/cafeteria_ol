@@ -99,7 +99,7 @@
   var modal = $(this)
  
   $.ajax({
-  	url:"http://localhost:5000/api/stores/"+storeid,
+  	url:"/api/stores/"+storeid,
   	dataType: "json"
   }).done(function (data){
   	store = data;
@@ -108,7 +108,7 @@
   })
   
   $.ajax({
-  	url:"http://localhost:5000/api/dishes/"+dishid,
+  	url:"/api/dishes/"+dishid,
   	dataType: "json"
   }).done(function (data){
   	dish = data;

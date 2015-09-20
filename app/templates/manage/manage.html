@@ -43,7 +43,7 @@
 	{% endif %}
 	{% endfor %}
 		<tr>
-			<td colspan="6"><button class="btn btn-block btn-success btn-large updatebtn">Update Orders</button></td>
+			<td colspan="6"><button class="btn btn-block btn-success btn-large updatebtn" data-loading-text="Updating...">Update Orders</button></td>
 		</tr>
 	</table>
 </div>
@@ -80,7 +80,7 @@
 	{% endif %}
 	{% endfor %}
 		<tr>
-			<td colspan="6"><button class="btn btn-block btn-success btn-large recoverbtn">Recover Orders</button></td>
+			<td colspan="6"><button class="btn btn-block btn-success btn-large recoverbtn" data-loading-text="Recovering...">Recover Orders</button></td>
 		</tr>
 	</table>
 </div>
@@ -116,47 +116,49 @@
 {{ super() }}
 
 <script type="text/javascript">
-	$('.updatebtn').on('click', function() {
-		$('.active-form').each(function(){
-			var state= $(this).find(".order-state").val();
-			var orderid = $(this).find(".order-state").attr("id");
-			console.log(orderid)
-			if (state == 2) {
-				$(this).on('submit', function(e) {
-					$.ajax({
-					  type: "POST",
-					  url: "/manageupdate-orders",
-					  data: {'state':state, 'orderid':orderid},
-					});
-					e.preventDefault()
-				})
-				$(this).submit()
-			}
-		})
-		$.post("/update-missed")
-		location.reload()
+  $('.updatebtn').on('click', function() {
+      var $btn = $(this).button('loading')
+      $('.active-form').each(function(){
+          var state= $(this).find(".order-state").val();
+	  var orderid = $(this).find(".order-state").attr("id");
+          if (state == 2) {
+	  $(this).on('submit', function(e) {
+	        $.ajax({
+	        type: "POST",
+	        url: "/manage/update-orders",
+	        data: {'state':state, 'orderid':orderid},
+	        });
+	        e.preventDefault()
+	  })
+	  $(this).submit()
+	  }
+          }).promise().done(setTimeout(function(){
+	                $.post("/manage/update-missed")
+	                location.reload()
+	  },2000))
 	})
 
 	$('.recoverbtn').on('click', function() {
+                var $btn = $(this).button('loading')
 		$('.pickec-form').each(function(){
 			var state= $(this).find(".order-state").val();
 			var orderid = $(this).find(".order-state").attr("id");
 			console.log(orderid)
 			if (state == 1) {
 				$(this).on('submit', function(e) {
-					//$.post("update-orders/")
 					$.ajax({
 					  type: "POST",
-					  url: "update-orders",
+					  url: "/manage/update-orders",
 					  data: {'state':state, 'orderid':orderid},
 					});
 					e.preventDefault()
 				})
 				$(this).submit()
 			}
-		})
-		$.post("/update-missed")
-		location.reload()
+		}).promise().done(setTimeout(function(){
+	                $.post("/manage/update-missed")
+	                location.reload()
+	        },2000))
 	})
 
 	$('.markButton').on('click', function () {
