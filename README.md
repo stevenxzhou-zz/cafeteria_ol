@@ -20,7 +20,7 @@ Then activate the virtual environment
 
 Install packages
 
-    $ pip install -r requirements/common.txt
+    $ pip install -r requirements.txt
 
 Run Application
 
