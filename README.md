@@ -1,7 +1,31 @@
-Flasky
+Ridecell Interview
 ======
 
-This repository contains the source code examples for my O'Reilly book [Flask Web Development](http://www.flaskbook.com).
+This repository is a challenge from Ridecell interview.
 
-The commits and tags in this repository were carefully created to match the sequence in which concepts are presented in the book. Please read the section titled "How to Work with the Example Code" in the book's preface for instructions.
 
+# Configuration Guide
+
+Make sure to use Python version 2.7.x.
+
+Install `virtualenv` if needed.
+
+If you do not have a virtual environment yet on the project folder, set it up with:
+
+    $ virtualenv venv
+
+Then activate the virtual environment
+
+    $ source venv/bin/activate
+
+Install packages
+
+    $ pip install -r requirements.txt
+
+Run Application
+
+    $ python manage.py runserver
+
+Visit App
+
+    $ localhost:5000
