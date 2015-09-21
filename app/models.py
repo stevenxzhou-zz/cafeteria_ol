@@ -77,7 +77,7 @@ class Dish(db.Model):
             'store_id'  :self.store_id
     }
 
-    def __repr_(self):
+    def __repr__(self):
         return '<Dish %r>' % self.dishname
 
     
@@ -100,7 +100,7 @@ class Order(db.Model):
             'date'      :self.date,
             'state'     :self.state
     }
-    def __repr_(self):
+    def __repr__(self):
         return '<Order %r>' % self.id
 
 class ShopOwner(db.Model):
