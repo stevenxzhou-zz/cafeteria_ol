@@ -11,7 +11,7 @@ class NameForm(Form):
 class TimePickerForm(Form):
     storeid = StringField('Store', validators=[Required()])
     dishid = StringField('Dish', validators=[Required()])
-    time = DateTimeField('Time', format='%m/%d/%Y %H:%M')
+    time = DateTimeField('Time', format='%m/%d/%Y %H:%M', validators=[Required])
     submit = SubmitField('Submit')
 
 class StateUpdateForm(Form):
